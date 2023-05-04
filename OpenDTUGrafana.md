@@ -93,6 +93,7 @@ Inverter -> openDTU -> MQTT Broker ->
   certfile /etc/mosquitto/certs/server.pem
   keyfile /etc/mosquitto/certs/server.key
   ```
+* If not already done open the 8883 port on your server (`ìptables` or on ubuntu: `sudo ufw allow 8883`
 * Test the setup (best from client to server, or two terminals on the server)
   ```bash
   mosquitto_sub -h [YOUR DOMAINNAME] -t test -p 8883 --capath /etc/ssl/certs/ -u "[YOUR USERNAME]" -P "[YOUR_PASSWORD]"
