@@ -16,7 +16,6 @@ This is a guide how to setup [openDTU](https://github.com/tbnobody/OpenDTU) to p
     - [Telegraf - Buckets for downsampled data](#telegraf---buckets-for-downsampled-data)
     - [Downsampling Tasks](#downsampling-tasks)
     - [Forever Bucket ("infinite" into past)](#forever-bucket-infinite-into-past)
-- [Congratulations you now have a grafana for your opendtu](#congratulations-you-now-have-a-grafana-for-your-opendtu)
 
 
 ## Architecture
@@ -93,7 +92,7 @@ Inverter -> openDTU -> MQTT Broker ->
   certfile /etc/mosquitto/certs/server.pem
   keyfile /etc/mosquitto/certs/server.key
   ```
-* If not already done open the 8883 port on your server (`ìptables` or on ubuntu: `sudo ufw allow 8883`
+* If not already done open the 8883 port on your server (`ìptables` or on ubuntu: `sudo ufw allow 8883`)
 * Test the setup (best from client to server, or two terminals on the server)
   ```bash
   mosquitto_sub -h [YOUR DOMAINNAME] -t test -p 8883 --capath /etc/ssl/certs/ -u "[YOUR USERNAME]" -P "[YOUR_PASSWORD]"
@@ -318,4 +317,5 @@ rp_config,idx=5 rp="year",start=2678401000i,end=31622401000i,interval="21600s" -
       |> limit(n: 1)
       |> keep(columns: ["name"]) //remove all fields except for "name"
     ```
-# Congratulations you now have a grafana for your opendtu
+
+**Congratulations you now have a grafana for your opendtu**
