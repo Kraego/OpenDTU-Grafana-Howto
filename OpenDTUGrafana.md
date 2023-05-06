@@ -5,17 +5,17 @@ This is a guide how to setup [openDTU](https://github.com/tbnobody/OpenDTU) to p
 
 ![Grafana Dashboard](images/GrafanaDashboard.png)
 
-- [Guide OpenDTU - mqtt - grafana](#guide-opendtu---mqtt---grafana)
-  - [Architecture](#architecture)
-  - [Prerequisite](#prerequisite)
-  - [MQTT - Mosquitto](#mqtt---mosquitto)
-  - [Influx DB2 Setup](#influx-db2-setup)
-  - [Telegraf setup](#telegraf-setup)
-  - [Grafana](#grafana)
-  - [Influx Data Optimization - (Optional)](#influx-data-optimization---optional)
-    - [Telegraf - Buckets for downsampled data](#telegraf---buckets-for-downsampled-data)
-    - [Downsampling Tasks](#downsampling-tasks)
-    - [Forever Bucket ("infinite" into past)](#forever-bucket-infinite-into-past)
+Content:
+- [Architecture](#architecture)
+- [Prerequisite](#prerequisite)
+- [MQTT - Mosquitto](#mqtt---mosquitto)
+- [Influx DB2 Setup](#influx-db2-setup)
+- [Telegraf setup](#telegraf-setup)
+- [Grafana](#grafana)
+- [Influx Data Optimization - (Optional)](#influx-data-optimization---optional)
+  - [Telegraf - Buckets for downsampled data](#telegraf---buckets-for-downsampled-data)
+  - [Downsampling Tasks](#downsampling-tasks)
+  - [Forever Bucket ("infinite" into past)](#forever-bucket-infinite-into-past)
 
 
 ## Architecture
@@ -128,9 +128,13 @@ Telegraf acts as an adapter or bridge between mqtt subscriber and the influxdb2,
 
 * install with: `sudo apt install telegraf`
 * if not already done setup your influxdb2 with `influx setup`
-* create a bucket with retention 23h59m59s (1 sec less than day) on your influxdb2 instance:
+* if you planning to do the data optimization part, create a bucket with retention 23h59m59s (1 sec less than day) on your influxdb2 instance:
   ```bash
   influx bucket create -o [YOUR ORGANIZATION] -n telegraf/actual -r 86399s --shard-group-duration 2h
+  ```  
+* otherwise create the bucket with the default retention time 168h (1 week)
+  ```bash
+  influx bucket create -o [YOUR ORGANIZATION] -n telegraf/actual
   ```  
 * Create token for accessing influxdb2 and store it in a environment variable.
   ```bash
