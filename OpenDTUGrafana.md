@@ -233,7 +233,6 @@ This section describes how to downsample old dataframes in your buckets. This he
 
   from(bucket: "telegraf/actual")
       |> range(start: -task.every)
-      |> filter(fn: (r) => r._field == "value")
       |> aggregateWindow(every: 1m, fn: mean)
       |> to(org: "[YOUR ORGANIZATION]", bucket: "telegraf/day")
   EOT
@@ -245,7 +244,6 @@ This section describes how to downsample old dataframes in your buckets. This he
 
   from(bucket: "telegraf/actual")
       |> range(start: -task.every)
-      |> filter(fn: (r) => r._field == "value")
       |> aggregateWindow(every: 5m, fn: mean)
       |> to(org: "[YOUR ORGANIZATION]", bucket: "telegraf/week")
   EOT
@@ -257,7 +255,6 @@ This section describes how to downsample old dataframes in your buckets. This he
 
   from(bucket: "telegraf/day")
       |> range(start: -task.every)
-      |> filter(fn: (r) => r._field == "value")
       |> aggregateWindow(every: 30m, fn: mean)
       |> to(org: "[YOUR ORGANIZATION]", bucket: "telegraf/month")
   EOT
@@ -268,7 +265,6 @@ This section describes how to downsample old dataframes in your buckets. This he
 
   from(bucket: "telegraf/day")
       |> range(start: -task.every)
-      |> filter(fn: (r) => r._field == "value")
       |> aggregateWindow(every: 6h, fn: mean)
       |> to(org: "[YOUR ORGANIZATION]", bucket: "telegraf/year")
   EOT
