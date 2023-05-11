@@ -6,16 +6,17 @@ This is a guide how to setup [openDTU](https://github.com/tbnobody/OpenDTU) to p
 ![Grafana Dashboard](images/GrafanaDashboard.png)
 
 Content:
-- [Architecture](#architecture)
-- [Prerequisite](#prerequisite)
-- [MQTT - Mosquitto](#mqtt---mosquitto)
-- [Influx DB2 Setup](#influx-db2-setup)
-- [Telegraf setup](#telegraf-setup)
-- [Grafana](#grafana)
-- [Influx Data Optimization - (Optional)](#influx-data-optimization---optional)
-  - [Telegraf - Buckets for downsampled data](#telegraf---buckets-for-downsampled-data)
-  - [Downsampling Tasks](#downsampling-tasks)
-  - [Forever Bucket ("infinite" into past)](#forever-bucket-infinite-into-past)
+- [Guide OpenDTU - mqtt - grafana](#guide-opendtu---mqtt---grafana)
+  - [Architecture](#architecture)
+  - [Prerequisite](#prerequisite)
+  - [MQTT - Mosquitto](#mqtt---mosquitto)
+  - [Influx DB2 Setup](#influx-db2-setup)
+  - [Telegraf setup](#telegraf-setup)
+  - [Grafana](#grafana)
+  - [Influx Data Optimization - (Optional)](#influx-data-optimization---optional)
+    - [Telegraf - Buckets for downsampled data](#telegraf---buckets-for-downsampled-data)
+    - [Downsampling Tasks](#downsampling-tasks)
+    - [Create a query variable to select correct bucket depending on range selection grafana](#create-a-query-variable-to-select-correct-bucket-depending-on-range-selection-grafana)
 
 
 ## Architecture
@@ -215,7 +216,7 @@ This section describes how to downsample old dataframes in your buckets. This he
 
 ### Telegraf - Buckets for downsampled data
 
-* Create Buckets for downsampled data
+* Create Buckets for downsampled data (this setup is for one year, if you want to keep the data longer adjust the `--retention` parameter)
   
   ```bash
   influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/day --retention 1d --shard-group-duration 1h
@@ -272,50 +273,38 @@ This section describes how to downsample old dataframes in your buckets. This he
   ```
   * Check if tasks are created with: `influx task list`
 
-### Forever Bucket ("infinite" into past)
+### Create a query variable to select correct bucket depending on range selection grafana
 
-**Create forever bucket for grafana**
-```bash
-influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/forever --retention 0
+* See Variables in the settings of the dashboard
+* This query finds the bucket with matching retention duration (if it don't work, check the retention settings of the buckets with `influx bucket list`)
+* Variable: sort disable/on time change
+* Query (source: http://wiki.webperfect.ch/index.php?title=Grafana:_Dynamic_Retentions_(InfluxDB))
+  ```
+  //Bucketfilter to filter only buckets beginning with name telegraf..
+  bucketfilter = /telegraf.*/
 
-influx write -o "[YOUR ORGANIZATION]" --bucket telegraf/forever '
-rp_config,idx=1 rp="actual",start=0i,end=12000000i,interval="10s" -9223372036854775806
-rp_config,idx=2 rp="day",start=12000000i,end=86401000i,interval="60s" -9223372036854775806
-rp_config,idx=3 rp="week",start=86401000i,end=604801000i,interval="300s" -9223372036854775806
-rp_config,idx=4 rp="month",start=604801000i,end=2678401000i,interval="1800s" -9223372036854775806
-rp_config,idx=5 rp="year",start=2678401000i,end=31622401000i,interval="21600s" -9223372036854775806'
-```
-* **Create a query variable to select the correct range in grafana**
-  * See Variables in the settings of the dashboard
-  * This query finds the bucket with matching retention duration (if it don't work, check the retention settings of the buckets with `influx bucket list`)
-  * Variable: sort disable/on time change
-  * Query (source: http://wiki.webperfect.ch/index.php?title=Grafana:_Dynamic_Retentions_(InfluxDB))
-    ```
-    //Bucketfilter to filter only buckets beginning with name telegraf..
-    bucketfilter = /telegraf.*/
-
-    buckets()
-      |> filter(fn: (r) => r.name =~ bucketfilter)
-      //convert retentionperiod from nanosecond to days
-      |> map(fn: (r) => ({r with 
-        retentionPeriodinDays: r.retentionPeriod / 86400000000000}) 
-      )
-      //replace retentionpolicy infinity with a high number in NS
-      |> map(fn: (r) => ({r with
-        retentionPeriod: if r.retentionPeriod == 0 then 999999999999999999
-        else r.retentionPeriod})
-      )
-      //calculate the duration from "to" and "from" timespan and convert it to nanosecond
-      |> map(fn: (r) => ({r with 
-        DashboardDurationinNS: (${__to} - ${__from}) * 1000000})
-      )
-      |> filter(fn: (r) => 
-        r.DashboardDurationinNS <= r.retentionPeriod and
-        r.retentionPeriod >= uint(v: now()) - uint(v: ${__from} * 1000000)
-      )
-      |> sort(columns: ["retentionPeriod"], desc: false)
-      |> limit(n: 1)
-      |> keep(columns: ["name"]) //remove all fields except for "name"
-    ```
+  buckets()
+    |> filter(fn: (r) => r.name =~ bucketfilter)
+    //convert retentionperiod from nanosecond to days
+    |> map(fn: (r) => ({r with 
+      retentionPeriodinDays: r.retentionPeriod / 86400000000000}) 
+    )
+    //replace retentionpolicy infinity with a high number in NS
+    |> map(fn: (r) => ({r with
+      retentionPeriod: if r.retentionPeriod == 0 then 999999999999999999
+      else r.retentionPeriod})
+    )
+    //calculate the duration from "to" and "from" timespan and convert it to nanosecond
+    |> map(fn: (r) => ({r with 
+      DashboardDurationinNS: (${__to} - ${__from}) * 1000000})
+    )
+    |> filter(fn: (r) => 
+      r.DashboardDurationinNS <= r.retentionPeriod and
+      r.retentionPeriod >= uint(v: now()) - uint(v: ${__from} * 1000000)
+    )
+    |> sort(columns: ["retentionPeriod"], desc: false)
+    |> limit(n: 1)
+    |> keep(columns: ["name"]) //remove all fields except for "name"
+  ```
 
 **Congratulations you now have a grafana for your opendtu**
