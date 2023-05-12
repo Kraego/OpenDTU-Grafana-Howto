@@ -32,6 +32,7 @@ Inverter -> openDTU -> MQTT Broker ->
 
 * A linux (debian some stuff is debian specific) server (or cluster) with `grafana`, `influxdb2`,`mosquitto`, `telegraf`, `certbot`
 * A openDTU Device (see https://github.com/tbnobody/OpenDTU) how to build one
+* **There is also a `dockerized version`: https://github.com/Kraego/OpenDTU-Grafana-Stack (works basically but also needs some manual steps)** 
 
 
 ## MQTT - Mosquitto
