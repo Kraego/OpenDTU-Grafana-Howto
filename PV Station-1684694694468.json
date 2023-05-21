@@ -1,0 +1,830 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "PV Installation",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r._field == \"power\")\n  |> filter(fn: (r) => r.channel == \"0\")\n  |> truncateTimeColumn(unit: 2m)\n  |> hourSelection(start: 4, stop: 22)\n  \n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Power Now",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "power {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"}",
+                "power {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"}"
+              ],
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"})",
+            "renamePattern": "east"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"})",
+            "renamePattern": "west"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 6,
+        "y": 0
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r._field == \"yieldday\")\n  |> filter(fn: (r) => r.channel == \"0\")\n  |> truncateTimeColumn(unit: 20m)\n  |> last()\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Yield Total Today",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "yieldday {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"}",
+                "yieldday {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"}"
+              ],
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"})",
+            "renamePattern": "east"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"})",
+            "renamePattern": "west"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r._field == \"yieldtotal\")\n  |> filter(fn: (r) => r.channel == \"0\")\n  |> truncateTimeColumn(unit: 20m)\n  |> last()\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Yield Total Today",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "yieldtotal {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"}",
+                "yieldtotal {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"}"
+              ],
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"})",
+            "renamePattern": "east"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"})",
+            "renamePattern": "west"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last",
+            "max",
+            "logmin"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r._field == \"power\")\n  |> filter(fn: (r) => r.channel == \"0\")\n  |> truncateTimeColumn(unit: 2m)\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Power",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "power {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"}",
+                "power {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"}"
+              ],
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"})",
+            "renamePattern": "east"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"})",
+            "renamePattern": "west"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Temp",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r.channel == \"0\" and r.serial == \"${InverterEast}\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature-East",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "temp",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "temp"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r.channel == \"0\" and r.serial == \"${InverterWest}\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature-West",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.69,
+        "fullHighlight": false,
+        "groupWidth": 0.24,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+          },
+          "key": "Q-e61c3a3b-2bed-48d5-ad9c-17f0724fd382-0",
+          "query": "from(bucket: \"${telegraf_all}\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement =~ /mqtt*/)\n  |> filter(fn: (r) => r._field == \"yieldday\")\n  |> filter(fn: (r) => r.channel == \"0\")\n  |> truncateTimeColumn(unit: 1d)\n\n\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Yield per day",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "yieldday {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"}",
+                "yieldday {channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"}"
+              ],
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL1]\"})",
+            "renamePattern": "east"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*{channel=\"0\", name=\"mqtt_consumer\", serial=\"[YOUR INVERTER SERIAL2]\"})",
+            "renamePattern": "west"
+          }
+        }
+      ],
+      "type": "barchart"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "hide": 2,
+        "name": "InverterWest",
+        "query": "[YOUR INVERTER SERIAL2]",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "hide": 2,
+        "name": "InverterEast",
+        "query": "[YOUR INVERTER SERIAL1]",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "telegraf/actual",
+          "value": "telegraf/actual"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+        },
+        "definition": "//Bucketfilter to filter only buckets beginning with name telegraf..\r\nbucketfilter = /telegraf.*/\r\n\r\nbuckets()\r\n  |> filter(fn: (r) => r.name =~ bucketfilter)\r\n  //convert retentionperiod from nanosecond to days\r\n  |> map(fn: (r) => ({r with \r\n    retentionPeriodinDays: r.retentionPeriod / 86400000000000}) \r\n  )\r\n  //replace retentionpolicy infinity with a high number in NS\r\n  |> map(fn: (r) => ({r with\r\n    retentionPeriod: if r.retentionPeriod == 0 then 999999999999999999\r\n    else r.retentionPeriod})\r\n  )\r\n  //calculate the duration from \"to\" and \"from\" timespan and convert it to nanosecond\r\n  |> map(fn: (r) => ({r with \r\n    DashboardDurationinNS: (${__to} - ${__from}) * 1000000})\r\n  )\r\n  |> filter(fn: (r) => \r\n    r.DashboardDurationinNS <= r.retentionPeriod and\r\n    r.retentionPeriod >= uint(v: now()) - uint(v: ${__from} * 1000000)\r\n  )\r\n  |> sort(columns: [\"retentionPeriod\"], desc: false)\r\n  |> limit(n: 1)\r\n  |> keep(columns: [\"name\"]) //remove all fields except for \"name\"",
+        "description": "All data stored by telegraf with downsampled data",
+        "hide": 0,
+        "includeAll": false,
+        "label": "",
+        "multi": false,
+        "name": "telegraf_all",
+        "options": [],
+        "query": "//Bucketfilter to filter only buckets beginning with name telegraf..\r\nbucketfilter = /telegraf.*/\r\n\r\nbuckets()\r\n  |> filter(fn: (r) => r.name =~ bucketfilter)\r\n  //convert retentionperiod from nanosecond to days\r\n  |> map(fn: (r) => ({r with \r\n    retentionPeriodinDays: r.retentionPeriod / 86400000000000}) \r\n  )\r\n  //replace retentionpolicy infinity with a high number in NS\r\n  |> map(fn: (r) => ({r with\r\n    retentionPeriod: if r.retentionPeriod == 0 then 999999999999999999\r\n    else r.retentionPeriod})\r\n  )\r\n  //calculate the duration from \"to\" and \"from\" timespan and convert it to nanosecond\r\n  |> map(fn: (r) => ({r with \r\n    DashboardDurationinNS: (${__to} - ${__from}) * 1000000})\r\n  )\r\n  |> filter(fn: (r) => \r\n    r.DashboardDurationinNS <= r.retentionPeriod and\r\n    r.retentionPeriod >= uint(v: now()) - uint(v: ${__from} * 1000000)\r\n  )\r\n  |> sort(columns: [\"retentionPeriod\"], desc: false)\r\n  |> limit(n: 1)\r\n  |> keep(columns: [\"name\"]) //remove all fields except for \"name\"",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "PV Station",
+  "uid": "a966bdab-a12b-4b07-b491-3a62941ca4c7",
+  "version": 39,
+  "weekStart": ""
+}

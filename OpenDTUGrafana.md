@@ -207,8 +207,18 @@ Telegraf acts as an adapter or bridge between mqtt subscriber and the influxdb2,
 * Root the port (default: 3000) to the route used in your let's encrypt certificates
   * let's encrypt certificate for grafana
 * add datasource telegraf (bucket) - use **FLUX** as it is the query language require since `influxdb2`
+  ![Grafana data connection](images/Grafana-add-influxdb.png)
 * Replace `[YOUR INVERTER SERIAL1]` and `[YOUR INVERTER SERIAL2]` with your inverter serial numbers in `PV Station-1683031347933.json`
-* **load the dashboard json `PV Station-1683031347933.json` in grafana**
+* Replace the uid of the influxDB
+  * Find out the uid of your influxDB with calling: `https://[your grafana URL]/api/datasources/name/InfluxDB` in your browser
+  * Replace `uid` in every occurrence of: 
+    ```
+      "datasource": {
+      "type": "influxdb",
+      "uid": "ccdc09e4-b747-4e37-a3f9-aed28da7bab5"
+    },
+    ```
+* **load the dashboard json `PV Station-1684694694468` in grafana**
 * Change it to match your installation
 
 ## Influx Data Optimization - (Optional)
