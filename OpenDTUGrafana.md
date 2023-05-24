@@ -223,7 +223,7 @@ Telegraf acts as an adapter or bridge between mqtt subscriber and the influxdb2,
 
 ## Influx Data Optimization - (Optional)
 
-This section describes how to downsample old dataframes in your buckets. This helps to safe memory and will enable you to monitor several years back.
+This section describes how to downsample old dataframes in your buckets. This helps to safe memory and will enable you to monitor data five years back.
 
 ### Telegraf - Buckets for downsampled data
 
@@ -233,7 +233,7 @@ This section describes how to downsample old dataframes in your buckets. This he
   influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/day --retention 1d --shard-group-duration 1h
   influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/week --retention 7d --shard-group-duration 1d
   influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/month --retention 31d --shard-group-duration 1d
-  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/year --retention 366d --shard-group-duration 7d
+  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/year --retention 1830d --shard-group-duration 7d
   ```
 
 ### Downsampling Tasks
@@ -285,6 +285,9 @@ This section describes how to downsample old dataframes in your buckets. This he
   * Check if tasks are created with: `influx task list`
 
 ### Create a query variable to select correct bucket depending on range selection grafana
+
+**This variable will be created during json import of the dashboard.**
+But if you create a dashboard from scratch create this variable manually as described in the following section.
 
 * See Variables in the settings of the dashboard
 * This query finds the bucket with matching retention duration (if it don't work, check the retention settings of the buckets with `influx bucket list`)
