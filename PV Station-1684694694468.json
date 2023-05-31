@@ -274,7 +274,7 @@
           "refId": "A"
         }
       ],
-      "title": "Yield Total Today",
+      "title": "Yield Total",
       "transformations": [
         {
           "id": "calculateField",
