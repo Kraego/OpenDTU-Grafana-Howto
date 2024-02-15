@@ -230,9 +230,9 @@ This section describes how to downsample old dataframes in your buckets. This he
 * Create Buckets for downsampled data (this setup is for one year, if you want to keep the data longer adjust the `--retention` parameter)
   
   ```bash
-  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/day --retention 1d --shard-group-duration 1h
-  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/week --retention 7d --shard-group-duration 1d
-  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/month --retention 31d --shard-group-duration 1d
+  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/day --retention 7d --shard-group-duration 1h
+  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/week --retention 30d --shard-group-duration 1d
+  influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/month --retention 90d --shard-group-duration 1d
   influx bucket create -o "[YOUR ORGANIZATION]" -n telegraf/year --retention 1830d --shard-group-duration 7d
   ```
 
